@@ -7,8 +7,7 @@ const { DynamoDBDocumentClient,
     UpdateCommand,
     DeleteCommand
 } = require("@aws-sdk/lib-dynamodb");
-const { v4: uuidv4 } = require('uuid');
-const { logger } = require('./logger.js');
+const { logger } = require('../util/logger.js');
 
 const client = new DynamoDBClient({ region: "us-west-1" }); // replace with your region
 
@@ -29,12 +28,12 @@ async function getTicketList() {
     }
 }
 
-async function getTicketListEmployeeId(userId) {
+async function getTicketListEmployeeId(user_id) {
     const queryCommand = new QueryCommand({
         TableName,
         KeyConditionExpression: "#u = :u",
-        ExpressionAttributeNames: {"#u": user_id},
-        ExpressionAttributeValues: {":u": {S: userId}}
+        ExpressionAttributeNames: {"#u": "user_id"},
+        ExpressionAttributeValues: { ":u": { S: user_id }}
     });
     try {
         const data = await documentClient.send(queryCommand);
@@ -45,18 +44,10 @@ async function getTicketListEmployeeId(userId) {
     }
 }
 
-async function createTicket(userId, description, amount, type) {
-    const newTicket = {
-        ticket_id: uuidv4(),
-        user_id: userId,
-        description,
-        amount,
-        type,
-        status: "pending"
-    };
+async function createTicket(Item) {
     const putCommand = new PutCommand({
         TableName,
-        Item: newTicket
+        Item
     });
     try {
         const data = await documentClient.send(putCommand);
@@ -67,15 +58,15 @@ async function createTicket(userId, description, amount, type) {
     }
 }
 
-async function processTicket(ticketId, userId, outcome){
+async function processTicket(ticket_id, user_id, status){
     const updateCommand = new UpdateCommand({
         TableName,
-        Key: {ticket_id: ticketId,
-            user_id:userId
+        Key: {ticket_id,
+            user_id
         },
         UpdateExpression: "SET status = :status",
         ExpressionAttributeValues: {
-            ":status": outcome
+            ":status": status
         }
     });
     try {

@@ -8,7 +8,7 @@ const { DynamoDBDocumentClient,
         DeleteCommand
     } = require("@aws-sdk/lib-dynamodb");
 const { v4: uuidv4 } = require('uuid');
-const { logger } = require('./logger.js');
+const { logger } = require('../util/logger.js');
 
 const client = new DynamoDBClient({ region: "us-west-1" }); // replace with your region
 
@@ -29,16 +29,29 @@ async function getUserList() {
     }
 }
 
-async function createUser(username, password) {
-    const newUser = {
-        user_id: uuidv4(),
-        username,
-        password,
-        role: "employee"
+async function getUserByUsername(username){
+    const scanCommand = ScanCommand({
+        TableName,
+        FilterExpression: "#u = :u",
+        ExpressionAttributeNames: {
+            "#u": "username"
+        },
+        ExpressionAttributeValues: {
+            ":u": { S: username }
+        }
+    });
+    try {
+        const data = await documentClient.send(scanCommand);
+        logger.info(JSON.stringify(data, null, 2));
+        return data;
+    } catch (err) {
+        logger.error(err);
     }
+}
+async function createUser(Item) {
     const putCommand = new PutCommand({
         TableName,
-        item: newUser
+        Item
     });
     try {
         const data = await documentClient.send(putCommand);
@@ -71,10 +84,10 @@ async function getUserByUsernamePassword(username, password) {
     }
 }
 
-async function getUserById(userId) {
+async function getUserById(user_id) {
     const getCommand = new GetCommand({
         TableName,
-        Key: {user_id:userId}
+        Key: {user_id}
     });
     try{
         const data = await documentClient.send(getCommand);
@@ -89,5 +102,6 @@ module.exports = {
     getUserList,
     createUser,
     getUserByUsernamePassword,
-    getUserById
+    getUserById,
+    getUserByUsername
 }
