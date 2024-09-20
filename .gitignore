@@ -131,3 +131,6 @@ dist
 
 #VSCode specific files
 .vscode
+
+#Secret Key for JWT
+secretKey.js

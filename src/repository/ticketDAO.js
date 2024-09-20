@@ -22,7 +22,7 @@ async function getTicketList() {
     try {
         const data = await documentClient.send(scanCommand);
         logger.info(JSON.stringify(data, null, 2));
-        return data;
+        return data.Items;
     } catch (err) {
         console.error(err);
     }
@@ -38,7 +38,7 @@ async function getTicketListEmployeeId(user_id) {
     try {
         const data = await documentClient.send(queryCommand);
         logger.info(JSON.stringify(data, null, 2));
-        return data;
+        return data.Items;
     } catch (err) {
         logger.error(err);
     }
@@ -78,9 +78,26 @@ async function processTicket(ticket_id, user_id, status){
     }
 }
 
+async function getTicketById(ticket_id){
+    const queryCommand = new QueryCommand({
+        TableName,
+        KeyConditionExpression: "#id = :id",
+        ExpressionAttributeNames: {"#id": "ticket_id"},
+        ExpressionAttributeValues: {":id": {S: ticket_id}}
+    });
+    try {
+        const data = await documentClient.send(queryCommand);
+        logger.info(queryCommand);
+        return data.Items[0];
+    } catch (err) {
+        logger.error(err);
+    }
+}
+
 module.exports = {
     getTicketList,
     getTicketListEmployeeId,
     createTicket,
-    processTicket
+    processTicket,
+    getTicketById
 }

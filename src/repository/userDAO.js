@@ -23,27 +23,27 @@ async function getUserList() {
     try {
         const data = await documentClient.send(scanCommand);
         logger.info(JSON.stringify(data, null, 2));
-        return data;
+        return data.Items;
     } catch (err) {
         logger.error(err);
     }
 }
 
 async function getUserByUsername(username){
-    const scanCommand = ScanCommand({
+    const scanCommand = new ScanCommand({
         TableName,
         FilterExpression: "#u = :u",
         ExpressionAttributeNames: {
             "#u": "username"
         },
         ExpressionAttributeValues: {
-            ":u": { S: username }
+            ":u": username
         }
     });
     try {
         const data = await documentClient.send(scanCommand);
         logger.info(JSON.stringify(data, null, 2));
-        return data;
+        return data.Items[0];
     } catch (err) {
         logger.error(err);
     }
@@ -63,7 +63,7 @@ async function createUser(Item) {
 }
 
 async function getUserByUsernamePassword(username, password) {
-    const scanCommand = ScanCommand({
+    const scanCommand = new ScanCommand({
         TableName,
         FilterExpression: "#u = :u AND #p = :p",
         ExpressionAttributeNames: {
@@ -78,7 +78,7 @@ async function getUserByUsernamePassword(username, password) {
     try{
         const data = await documentClient.send(scanCommand);
         logger.info(JSON.stringify(data, null, 2));
-        return data;
+        return data.Items[0];
     } catch (err) {
         logger.error(err);
     }
@@ -92,7 +92,7 @@ async function getUserById(user_id) {
     try{
         const data = await documentClient.send(getCommand);
         logger.info(JSON.stringify(data, null, 2));
-        return data;
+        return data.Item;
     } catch (err) {
         logger.error(err);
     }
