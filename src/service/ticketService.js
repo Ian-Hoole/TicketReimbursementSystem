@@ -14,6 +14,7 @@ async function createTicket(userId, description, amount, type) {
     if(!type){
         type = "other";
     }
+    logger.info(userId + " - " + description + " - " + amount + " - " + type);
     if(userId && description && amount){
         const newTicket = {
             ticket_id: uuidv4(),
@@ -23,6 +24,7 @@ async function createTicket(userId, description, amount, type) {
             type,
             status: "pending"
         };
+        logger.info("creating ticket" + JSON.stringify(newTicket));
         return await ticketDao.createTicket(newTicket);
     }
     return null;
@@ -32,18 +34,20 @@ async function getTicketList() {
     return await ticketDao.getTicketList();
 }
 
-async function approveTicket(ticketId, userId) {
-    //should check that ticket is pending
-    if(ticketId && userId){
-        return await ticketDao.processTicket(ticketId, userId, "approved");
+async function approveTicket(ticketId) {
+    const ticket = await getTicketById(ticketId);
+    if(ticket.status === "pending"){
+        if (ticketId) {
+            return await ticketDao.processTicket(ticketId, "approved");
+        }
     }
     return null;
 }
 
-async function denyTicket(ticketId, userId) {
+async function denyTicket(ticketId) {
     //should check that ticket is pending
-    if (ticketId && userId) {
-        return await ticketDao.processTicket(ticketId, userId, "denied");
+    if (ticketId) {
+        return await ticketDao.processTicket(ticketId, "denied");
     }
     return null;
 }
@@ -55,11 +59,15 @@ async function getTicketListEmployeeId(userId) {
     return null;
 }
 
+async function getTicketQueue(){
+    return await ticketDao.getTicketQueue();
+}
 module.exports = {
     getTicketList,
     createTicket,
     approveTicket,
     denyTicket,
     getTicketListEmployeeId,
-    getTicketById
+    getTicketById,
+    getTicketQueue
 }

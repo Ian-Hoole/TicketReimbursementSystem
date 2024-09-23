@@ -29,14 +29,14 @@ async function getTicketList() {
 }
 
 async function getTicketListEmployeeId(user_id) {
-    const queryCommand = new QueryCommand({
+    const scanCommand = new ScanCommand({
         TableName,
-        KeyConditionExpression: "#u = :u",
+        FilterExpression: "#u = :u",
         ExpressionAttributeNames: {"#u": "user_id"},
-        ExpressionAttributeValues: { ":u": { S: user_id }}
+        ExpressionAttributeValues: { ":u": user_id }
     });
     try {
-        const data = await documentClient.send(queryCommand);
+        const data = await documentClient.send(scanCommand);
         logger.info(JSON.stringify(data, null, 2));
         return data.Items;
     } catch (err) {
@@ -58,12 +58,10 @@ async function createTicket(Item) {
     }
 }
 
-async function processTicket(ticket_id, user_id, status){
+async function processTicket(ticket_id, status){
     const updateCommand = new UpdateCommand({
         TableName,
-        Key: {ticket_id,
-            user_id
-        },
+        Key: {ticket_id},
         UpdateExpression: "SET status = :status",
         ExpressionAttributeValues: {
             ":status": status
@@ -93,11 +91,31 @@ async function getTicketById(ticket_id){
         logger.error(err);
     }
 }
+async function getTicketQueue(){
+    const scanCommand = new ScanCommand({
+        TableName,
+        FilterExpression: "#s = :s",
+        ExpressionAttributeNames: {
+            "#s": "status"
+        },
+        ExpressionAttributeValues: {
+            ":s": "pending"
+        }
+    });
+    try {
+        const data = await documentClient.send(scanCommand);
+        logger.info(scanCommand);
+        return data.Items;
+    } catch (err) {
+        logger.error(err);
+    }
+}
 
 module.exports = {
     getTicketList,
     getTicketListEmployeeId,
     createTicket,
     processTicket,
-    getTicketById
+    getTicketById,
+    getTicketQueue
 }

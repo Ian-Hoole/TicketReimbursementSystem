@@ -15,6 +15,7 @@ async function createUser(username, password){
                 password: await bcrypt.hash(password, saltRound),
                 role: "employee"
             }
+            logger.info("creating user" + JSON.stringify(newUser));
             return await userDao.createUser(newUser);
         }
     }

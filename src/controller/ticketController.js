@@ -17,7 +17,7 @@ router.post("/", authenticateToken, async (req, res) => {
 
 router.put("/approved/:ticketId", authenticateManagerToken, async (req, res) => {
     logger.info("PUT /approved/:ticketId path entered");
-    const ticket = ticketService.approveTicket(req.params.ticketId, req.user.user_id);
+    const ticket = await ticketService.approveTicket(req.params.ticketId);
     if (ticket) {
         res.status(200).json({ ticket });
     } else {
@@ -27,7 +27,7 @@ router.put("/approved/:ticketId", authenticateManagerToken, async (req, res) => 
 
 router.put("/denied/:ticketId", authenticateManagerToken, async (req, res) => {
     logger.info("PUT /denied/:ticketId path entered");
-    const ticket = ticketService.denyTicket(req.params.ticketId,req.user.user_id);
+    const ticket = await ticketService.denyTicket(req.params.ticketId);
     if (ticket) {
         res.status(200).json({ ticket });
     } else {
@@ -37,19 +37,25 @@ router.put("/denied/:ticketId", authenticateManagerToken, async (req, res) => {
 
 router.get("/all", authenticateManagerToken, async (req, res) => {
     logger.info("get /all path entered admin");
-    const tickets = ticketService.getTicketList();
+    const tickets = await ticketService.getTicketList();
     res.status(200).json({ tickets });
+})
+
+router.get("/queue", authenticateManagerToken, async (req, res) => {
+    logger.info("get /queue path entered admin");
+    const tickets = await ticketService.getTicketQueue();
+    res.status(200).json({tickets});
 })
 
 router.get("/mytickets", authenticateToken, async (req, res) => {
     logger.info("get /mytickets path entered");
-    const tickets = ticketService.getTicketListEmployeeId(req.user.user_id);
+    const tickets = await ticketService.getTicketListEmployeeId(req.user.user_id);
     res.status(200).json({ tickets });
 })
 
 router.get("/:ticketId", async (req, res) => {
     logger.info("GET /:ticketId path entered");
-    const ticket = ticketService.getTicketById(req.params.ticketId);
+    const ticket = await ticketService.getTicketById(req.params.ticketId);
     if (ticket) {
         res.status(200).json({ ticket });
     } else {
