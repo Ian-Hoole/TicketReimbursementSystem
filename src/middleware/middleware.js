@@ -38,8 +38,6 @@ async function authenticateManagerToken(req, res, next) {
 async function decodeJWT(token) {
     try {
         const user = await jwt.verify(token, secretKey);
-        //console.log("encoded:" + JSON.stringify(token))
-        //console.log("decoded:" + JSON.stringify(user));
         return user;
     } catch (err) {
         logger.error(err);

@@ -7,16 +7,6 @@ const jwt = require("jsonwebtoken");
 
 const secretKey = getSecretKey();
 
-router.get("/account/:id", async (req, res) => {
-    logger.info("GET /accounts/:id path entered");
-    const account = await userService.getUserById(req.params.id);
-    if (account) {
-        res.status(200).json({ account });
-    }
-    else {
-        res.status(400).json({ message: "error creating user" })
-    }
-})
 
 router.get("/accounts/:username/:password", async (req, res) => {
     logger.info("GET /accounts/:username/:password path entered");
@@ -30,7 +20,7 @@ router.get("/accounts/:username/:password", async (req, res) => {
         {
             expiresIn: "1d"
         });
-        res.json({token});
+        res.status(200).json({token});
     }
     else{
         res.status(400).json({message: "no account found"})

@@ -15,8 +15,8 @@ router.post("/", authenticateToken, async (req, res) => {
     }
 });
 
-router.put("/approved/:ticketId", authenticateManagerToken, async (req, res) => {
-    logger.info("PUT /approved/:ticketId path entered");
+router.patch("/approved/:ticketId", authenticateManagerToken, async (req, res) => {
+    logger.info(`PUT /approved path entered ticketId: ${req.params.ticketId}`);
     const ticket = await ticketService.approveTicket(req.params.ticketId);
     if (ticket) {
         res.status(200).json({ ticket });
@@ -25,8 +25,8 @@ router.put("/approved/:ticketId", authenticateManagerToken, async (req, res) => 
     }
 });
 
-router.put("/denied/:ticketId", authenticateManagerToken, async (req, res) => {
-    logger.info("PUT /denied/:ticketId path entered");
+router.patch("/denied/:ticketId", authenticateManagerToken, async (req, res) => {
+    logger.info(`PUT /denied path entered ticketId: ${req.params.ticketId}`);
     const ticket = await ticketService.denyTicket(req.params.ticketId);
     if (ticket) {
         res.status(200).json({ ticket });
@@ -53,7 +53,7 @@ router.get("/mytickets", authenticateToken, async (req, res) => {
     res.status(200).json({ tickets });
 })
 
-router.get("/:ticketId", async (req, res) => {
+router.get("/:ticketId", authenticateManagerToken, async (req, res) => {
     logger.info("GET /:ticketId path entered");
     const ticket = await ticketService.getTicketById(req.params.ticketId);
     if (ticket) {

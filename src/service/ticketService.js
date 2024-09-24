@@ -14,7 +14,7 @@ async function createTicket(userId, description, amount, type) {
     if(!type){
         type = "other";
     }
-    logger.info(userId + " - " + description + " - " + amount + " - " + type);
+    //logger.info(userId + " - " + description + " - " + amount + " - " + type);
     if(userId && description && amount){
         const newTicket = {
             ticket_id: uuidv4(),
@@ -25,7 +25,11 @@ async function createTicket(userId, description, amount, type) {
             status: "pending"
         };
         logger.info("creating ticket" + JSON.stringify(newTicket));
-        return await ticketDao.createTicket(newTicket);
+        const response = await ticketDao.createTicket(newTicket);
+        logger.info("Service recieved response:" + response);
+        if(response === 200){
+            return newTicket;
+        }
     }
     return null;
 }
@@ -38,6 +42,7 @@ async function approveTicket(ticketId) {
     const ticket = await getTicketById(ticketId);
     if(ticket.status === "pending"){
         if (ticketId) {
+            console.log(ticketId)
             return await ticketDao.processTicket(ticketId, "approved");
         }
     }
@@ -46,8 +51,12 @@ async function approveTicket(ticketId) {
 
 async function denyTicket(ticketId) {
     //should check that ticket is pending
-    if (ticketId) {
-        return await ticketDao.processTicket(ticketId, "denied");
+    const ticket = await getTicketById(ticketId);
+    if (ticket.status === "pending") {
+        if (ticketId) {
+            console.log(ticketId)
+            return await ticketDao.processTicket(ticketId, "denied");
+        }
     }
     return null;
 }

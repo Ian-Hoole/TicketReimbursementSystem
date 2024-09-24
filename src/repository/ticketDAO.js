@@ -52,25 +52,26 @@ async function createTicket(Item) {
     try {
         const data = await documentClient.send(putCommand);
         logger.info(JSON.stringify(data, null, 2));
-        return data;
+        return data.$metadata.httpStatusCode;
     } catch (err) {
         logger.error(err);
     }
 }
 
+
 async function processTicket(ticket_id, status){
     const updateCommand = new UpdateCommand({
         TableName,
-        Key: {ticket_id},
-        UpdateExpression: "SET status = :status",
-        ExpressionAttributeValues: {
-            ":status": status
-        }
+        Key: {ticket_id: ticket_id},
+        UpdateExpression: "SET #s = :s",
+        ExpressionAttributeNames: {"#s": "status"},
+        ExpressionAttributeValues: {":s": status},
+        ReturnValues: "ALL_NEW"
     });
     try {
         const data = await documentClient.send(updateCommand);
         logger.info(JSON.stringify(data, null, 2));
-        return data;
+        return data.Items;
     } catch (err) {
         logger.error(err);
     }
@@ -81,11 +82,11 @@ async function getTicketById(ticket_id){
         TableName,
         KeyConditionExpression: "#id = :id",
         ExpressionAttributeNames: {"#id": "ticket_id"},
-        ExpressionAttributeValues: {":id": {S: ticket_id}}
+        ExpressionAttributeValues: {":id": ticket_id}
     });
     try {
         const data = await documentClient.send(queryCommand);
-        logger.info(queryCommand);
+        logger.info(JSON.stringify(data, null, 2));
         return data.Items[0];
     } catch (err) {
         logger.error(err);
@@ -104,7 +105,7 @@ async function getTicketQueue(){
     });
     try {
         const data = await documentClient.send(scanCommand);
-        logger.info(scanCommand);
+        logger.info(JSON.stringify(data, null, 2));
         return data.Items;
     } catch (err) {
         logger.error(err);
