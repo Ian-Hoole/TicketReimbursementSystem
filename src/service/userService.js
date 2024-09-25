@@ -8,6 +8,7 @@ const saltRound = 10;
 async function createUser(username, password){
     if(username && password){
         const userCheck = await userDao.getUserByUsername(username);
+        console.log(userCheck);
         if (!userCheck) {
             const newUser = {
                 user_id: uuidv4(),
@@ -18,7 +19,7 @@ async function createUser(username, password){
             logger.info("creating user" + JSON.stringify(newUser));
             const response = await userDao.createUser(newUser);
             logger.info("Service recieved response:" + response)
-            if(response.httpStatusCode === 200){
+            if(response === 200){
                 return {user_id: newUser.user_id, 
                         username: newUser.username, 
                         role:newUser.role};
@@ -29,10 +30,12 @@ async function createUser(username, password){
 }
 
 async function getUserByUsernamePassword(username, password){
-    const user = await userDao.getUserByUsername(username);
-    if(user){
-        if (await bcrypt.compare(password, user.password)) {
-            return { user_id: user.user_id, username: user.username, role: user.role };
+    if(username && password){
+        const user = await userDao.getUserByUsername(username);
+        if (user) {
+            if (await bcrypt.compare(password, user.password)) {
+                return { user_id: user.user_id, username: user.username, role: user.role };
+            }
         }
     }
     return null;
