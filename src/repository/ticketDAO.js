@@ -71,7 +71,7 @@ async function processTicket(ticket_id, status){
     try {
         const data = await documentClient.send(updateCommand);
         logger.info(JSON.stringify(data, null, 2));
-        return data.Items;
+        return data.Attributes[0];
     } catch (err) {
         logger.error(err);
     }
