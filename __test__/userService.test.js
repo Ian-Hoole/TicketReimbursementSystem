@@ -15,12 +15,12 @@ function rebuildDatabase() {
 
 //Mocked functions
 userDao.createUser = jest.fn(async (user) => {
-    await mockUserDB.push(user);
+    mockUserDB.push(user);
     return 200;
 });
 userDao.getUserByUsername = jest.fn(async (username) => {
     let tempUser = null;
-    await mockUserDB.forEach(user => {
+    mockUserDB.forEach(user => {
         if(user.username === username){
             tempUser = user;
         }
