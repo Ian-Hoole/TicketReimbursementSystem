@@ -5,7 +5,10 @@ const { logger } = require('../util/logger.js');
 
 async function getTicketById(ticketId){
     if(ticketId){
-        return await ticketDao.getTicketById(ticketId);
+        const ticket = await ticketDao.getTicketById(ticketId);
+        if(ticket){
+            return ticket;
+        }
     }
     return null;
 }
@@ -14,7 +17,7 @@ async function createTicket(userId, description, amount, type) {
     if(!type){
         type = "other";
     }
-    //logger.info(userId + " - " + description + " - " + amount + " - " + type);
+    logger.info(userId + " - " + description + " - " + amount + " - " + type);
     if(userId && description && amount){
         const newTicket = {
             ticket_id: uuidv4(),
@@ -39,23 +42,31 @@ async function getTicketList() {
 }
 
 async function approveTicket(ticketId) {
-    const ticket = await getTicketById(ticketId);
-    if(ticket.status === "pending"){
-        if (ticketId) {
-            console.log(ticketId)
-            return await ticketDao.processTicket(ticketId, "approved");
+    
+    if(ticketId){
+        const ticket = await getTicketById(ticketId);
+        if(ticket){
+            if (ticket.status === "pending") {
+                if (ticketId) {
+                    console.log(ticketId)
+                    return await ticketDao.processTicket(ticketId, "approved");
+                }
+            }
         }
     }
     return null;
 }
 
 async function denyTicket(ticketId) {
-    //should check that ticket is pending
-    const ticket = await getTicketById(ticketId);
-    if (ticket.status === "pending") {
-        if (ticketId) {
-            console.log(ticketId)
-            return await ticketDao.processTicket(ticketId, "denied");
+    if(ticketId){
+        const ticket = await getTicketById(ticketId);
+        if (ticket) {
+            if (ticket.status === "pending") {
+                if (ticketId) {
+                    console.log(ticketId)
+                    return await ticketDao.processTicket(ticketId, "denied");
+                }
+            }
         }
     }
     return null;
