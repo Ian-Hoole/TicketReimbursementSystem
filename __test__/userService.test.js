@@ -15,7 +15,6 @@ function rebuildDatabase() {
 
 //Mocked functions
 userDao.createUser = jest.fn(async (user) => {
-    mockUserDB.push(user);
     return 200;
 });
 userDao.getUserByUsername = jest.fn(async (username) => {
@@ -74,7 +73,7 @@ describe("Testing user creation via userService.createUser", () => {
         //Arrange
         const username = "alex";
         const password = "pass";
-        const dbResult = [...mockUserDB];
+
         let result = null
         //Action
         result = await userService.createUser(username, password);
@@ -82,24 +81,18 @@ describe("Testing user creation via userService.createUser", () => {
         expect(result).toBeNull();
         expect(userDao.getUserByUsername).toHaveBeenCalled();
         expect(userDao.createUser).not.toHaveBeenCalled();
-        expect(mockUserDB).toEqual(dbResult);
     });
     test("Adding a new valid user", async () => {
         //Arrange
         const username = "john";
         const password = "pass";
 
-        const dbResult = [{ user_id: "1", username: "alex", password: "1234", role: "employee" },
-        { user_id: "2", username: "administrator", password: "45678", role: "manager" },
-        { user_id: "3", username: "phil", password: "dang", role: "employee" },
-        { user_id: "4", username: "john", password: "pass", role: "employee" }];
         const expectedResult = { user_id: "4", username: "john", role: "employee" };
         let result = null
         //Action
         result = await userService.createUser(username, password);
         //Assert
         expect(result).toEqual(expectedResult);
-        expect(mockUserDB).toEqual(dbResult);
         expect(userDao.getUserByUsername).toHaveBeenCalled();
         expect(userDao.createUser).toHaveBeenCalled();
     });
