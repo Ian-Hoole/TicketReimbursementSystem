@@ -3,8 +3,8 @@ const { logger }  = require("./util/logger.js");
 const userRouter = require("./controller/userController.js");
 const ticketRouter = require("./controller/ticketController.js");
 const app = express();
-
-const PORT = 3000;
+const { getPort } = require("../constants.js");
+const PORT = getPort();
 
 app.use(express.json());
 

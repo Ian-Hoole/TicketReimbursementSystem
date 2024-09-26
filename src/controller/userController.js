@@ -1,7 +1,7 @@
 const express = require("express");
 const { logger } = require('../util/logger.js');
 const userService = require("../service/userService.js");
-const getSecretKey = require("../../secretKey.js");
+const {getSecretKey} = require("../../constants.js");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
 

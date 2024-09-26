@@ -9,7 +9,7 @@ router.post("/", authenticateToken, async (req, res) => {
     logger.info("POST / path entered");
     const ticket = await ticketService.createTicket(req.user.user_id, req.body.description, req.body.amount, req.body.type);
     if(ticket){
-        res.status(200).json({ticket});
+        res.status(201).json({ticket});
     }else{
         res.status(400).json({message: "ticket could not be created"});
     }
@@ -47,19 +47,19 @@ router.get("/queue", authenticateManagerToken, async (req, res) => {
     res.status(200).json({tickets});
 })
 
-router.get("/mytickets", authenticateToken, async (req, res) => {
+router.get("/my-tickets", authenticateToken, async (req, res) => {
     logger.info("get /mytickets path entered");
     const tickets = await ticketService.getTicketListEmployeeId(req.user.user_id);
     res.status(200).json({ tickets });
 })
 
-router.get("/:ticketId", authenticateManagerToken, async (req, res) => {
+router.get("/:ticketId", authenticateToken, async (req, res) => {
     logger.info("GET /:ticketId path entered");
-    const ticket = await ticketService.getTicketById(req.params.ticketId);
+    const ticket = await ticketService.getTicketById(req.params.ticketId, req.user.user_id, req.user.role);
     if (ticket) {
         res.status(200).json({ ticket });
     } else {
-        res.status(400).json({ message: "Ticket not found" });
+        res.status(404).json({ message: "Ticket not found" });
     }
 });
 

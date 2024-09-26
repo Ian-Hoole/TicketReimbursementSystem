@@ -133,4 +133,4 @@ dist
 .vscode
 
 #Secret Key for JWT
-secretKey.js
+constants.js
