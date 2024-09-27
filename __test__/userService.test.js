@@ -9,8 +9,8 @@ rebuildDatabase();
 
 function rebuildDatabase() {
     mockUserDB = [{ user_id: "1", username: "alex", password: "1234", role: "employee" },
-    { user_id: "2", username: "administrator", password: "45678", role: "manager" },
-    { user_id: "3", username: "phil", password: "dang", role: "employee" }];
+                { user_id: "2", username: "administrator", password: "45678", role: "manager" },
+                { user_id: "3", username: "phil", password: "dang", role: "employee" }];
 }
 
 //Mocked functions
@@ -91,6 +91,21 @@ describe("Testing user creation via userService.createUser", () => {
         let result = null
         //Action
         result = await userService.createUser(username, password);
+        //Assert
+        expect(result).toEqual(expectedResult);
+        expect(userDao.getUserByUsername).toHaveBeenCalled();
+        expect(userDao.createUser).toHaveBeenCalled();
+    });
+    test("Adding an new valid manager", async () => {
+        //Arrange
+        const username = "joe";
+        const password = "pass";
+        const role = "manager"
+
+        const expectedResult = { user_id: "4", username: "joe", role: "manager" };
+        let result = null
+        //Action
+        result = await userService.createUser(username, password, role);
         //Assert
         expect(result).toEqual(expectedResult);
         expect(userDao.getUserByUsername).toHaveBeenCalled();
