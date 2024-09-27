@@ -8,7 +8,7 @@ const saltRound = 10;
 async function createUser(username, password, role){
     if(username && password){
         let temprole = "employee";
-        if(role){
+        if(role === "manager"){
             temprole = role;
         }
         const userCheck = await userDao.getUserByUsername(username);
