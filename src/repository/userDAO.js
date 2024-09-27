@@ -18,9 +18,10 @@ const TableName = "TicketSystemUserTable"
 
 
 async function getUserByUsername(username){
-    const scanCommand = new ScanCommand({
+    const queryCommand = new QueryCommand({
         TableName,
-        FilterExpression: "#u = :u",
+        KeyConditionExpression: "#u = :u",
+        IndexName: "username-index",
         ExpressionAttributeNames: {
             "#u": "username"
         },
@@ -29,7 +30,7 @@ async function getUserByUsername(username){
         }
     });
     try {
-        const data = await documentClient.send(scanCommand);
+        const data = await documentClient.send(queryCommand);
         logger.info(JSON.stringify(data, null, 2));
         return data.Items[0];
     } catch (err) {
