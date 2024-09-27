@@ -5,8 +5,12 @@ const bcrypt = require("bcrypt");
 
 const saltRound = 10;
 
-async function createUser(username, password){
+async function createUser(username, password, role){
     if(username && password){
+        let temprole = "employee";
+        if(role){
+            temprole = role;
+        }
         const userCheck = await userDao.getUserByUsername(username);
         console.log(userCheck);
         if (!userCheck) {
@@ -14,7 +18,7 @@ async function createUser(username, password){
                 user_id: uuidv4(),
                 username,
                 password: await bcrypt.hash(password, saltRound),
-                role: "employee"
+                role: temprole
             }
             logger.info("creating user" + JSON.stringify(newUser));
             const response = await userDao.createUser(newUser);

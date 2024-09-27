@@ -11,10 +11,16 @@ async function authenticateToken(req, res, next) {
     if (!token) {
         res.status(401).json({ message: "Unauthorized Access" });
     } else {
-        const user = await decodeJWT(token);
-        await console.log(user);
-        req.user = user;
-        next();
+        try{
+            const user = await decodeJWT(token);
+            await console.log(user);
+            req.user = user;
+            next();
+        }catch(err) {
+            logger.error(err);
+            res.status(403).json({ message: "Unauthorized Access" });
+            return;
+        }
     }
 }
 
@@ -25,13 +31,20 @@ async function authenticateManagerToken(req, res, next) {
     if (!token) {
         res.status(401).json({ message: "Unauthorized Access" });
     } else {
-        const user = await decodeJWT(token);
-        if (user.role !== "manager") {
-            res.status(403).json({ message: "Forbidden Access" });
+        try{
+            const user = await decodeJWT(token);
+            logger.info("JSON Web token" + JSON.stringify(user));
+            if (user.role !== "manager") {
+                res.status(403).json({ message: "Forbidden Access" });
+                return;
+            }
+            req.user = user;
+            next();
+        }catch (err) {
+            logger.error(err);
+            res.status(403).json({ message: "Unauthorized Access" });
             return;
         }
-        req.user = user;
-        next();
     }
 }
 

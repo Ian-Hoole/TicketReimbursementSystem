@@ -8,30 +8,40 @@ const jwt = require("jsonwebtoken");
 const secretKey = getSecretKey();
 
 
-router.get("/accounts/:username/:password", async (req, res) => {
-    logger.info("GET /accounts/:username/:password path entered");
-    const account = await userService.getUserByUsernamePassword(req.params.username, req.params.password);
-    if(account){
-        const token = jwt.sign({
-            user_id: account.user_id,
-            username: account.username,
-            role: account.role
-        }, secretKey, 
-        {
-            expiresIn: "1d"
-        });
-        res.status(200).json({token});
+router.post("/login", async (req, res) => {
+    logger.info("GET /accounts/ path entered " + req.body.username + req.body.password);
+    let token = null;
+    if (req.body.username && req.body.password){
+        const account = await userService.getUserByUsernamePassword(req.body.username, req.body.password);
+        if (account) {
+            token = jwt.sign({
+                user_id: account.user_id,
+                username: account.username,
+                role: account.role
+            }, secretKey,
+                {
+                    expiresIn: "1d"
+                });
+            
+        }
+    }
+    if(token){
+        res.status(200).json({ token });
     }
     else{
         res.status(400).json({message: "no account found"})
     }
 })
 
-router.post("/accounts/:username/:password", async (req, res) => {
-    logger.info("POST /accounts/:username/:password path entered");
-    const account = await userService.createUser(req.params.username, req.params.password);
-    if (account) {
-        res.status(200).json({ account });
+router.post("/register", async (req, res) => {
+    logger.info("POST /register path entered");
+    console.log(req.body.username + req.body.password + req.body.role)
+    let account =  null;
+    if (req.body.username && req.body.password){
+        account = await userService.createUser(req.body.username, req.body.password, req.body.role);
+    }
+    if(account){
+        res.status(201).json({ account });
     }
     else {
         res.status(400).json({ message: "error creating account" })
