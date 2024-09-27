@@ -111,6 +111,21 @@ describe("Testing user creation via userService.createUser", () => {
         expect(userDao.getUserByUsername).toHaveBeenCalled();
         expect(userDao.createUser).toHaveBeenCalled();
     });
+    test("Adding an new user invalid role", async () => {
+        //Arrange
+        const username = "joe";
+        const password = "pass";
+        const role = "manigre"
+
+        const expectedResult = { user_id: "4", username: "joe", role: "employee" };
+        let result = null
+        //Action
+        result = await userService.createUser(username, password, role);
+        //Assert
+        expect(result).toEqual(expectedResult);
+        expect(userDao.getUserByUsername).toHaveBeenCalled();
+        expect(userDao.createUser).toHaveBeenCalled();
+    });
 });
 
 describe("Testing user logins via userService.getUserByUsername", () => {
