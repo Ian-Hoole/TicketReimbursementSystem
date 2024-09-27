@@ -35,7 +35,7 @@ router.post("/login", async (req, res) => {
 
 router.post("/register", async (req, res) => {
     logger.info("POST /register path entered");
-    console.log(req.body.username + req.body.password + req.body.role)
+    logger.info(req.body.username + req.body.password + req.body.role)
     let account =  null;
     if (req.body.username && req.body.password){
         account = await userService.createUser(req.body.username, req.body.password, req.body.role);

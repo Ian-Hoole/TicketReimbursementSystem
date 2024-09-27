@@ -55,7 +55,7 @@ async function approveTicket(ticketId) {
         if(ticket){
             if (ticket.status === "pending") {
                 if (ticketId) {
-                    //console.log(ticketId)
+                    //logger.info(ticketId)
                     const newTicket = await ticketDao.processTicket(ticketId, "approved");
                     return { ...newTicket, url:createTicketUrl(ticket.ticket_id) }
                 }
@@ -71,7 +71,7 @@ async function denyTicket(ticketId) {
         if (ticket) {
             if (ticket.status === "pending") {
                 if (ticketId) {
-                    //console.log(ticketId)
+                    //logger.info(ticketId)
                     const newTicket = await ticketDao.processTicket(ticketId, "denied");
                     return { ...newTicket, url: createTicketUrl(ticket.ticket_id) }
                 }

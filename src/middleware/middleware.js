@@ -13,7 +13,7 @@ async function authenticateToken(req, res, next) {
     } else {
         try{
             const user = await decodeJWT(token);
-            await console.log(user);
+            await logger.log(user);
             req.user = user;
             next();
         }catch(err) {

@@ -24,7 +24,7 @@ async function getTicketList() {
         logger.info(JSON.stringify(data, null, 2));
         return data.Items;
     } catch (err) {
-        console.error(err);
+        logger.error(err);
     }
 }
 
