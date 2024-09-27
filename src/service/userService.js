@@ -12,7 +12,7 @@ async function createUser(username, password, role){
             temprole = role;
         }
         const userCheck = await userDao.getUserByUsername(username);
-        logger.log(userCheck);
+        logger.info(userCheck);
         if (!userCheck) {
             const newUser = {
                 user_id: uuidv4(),
