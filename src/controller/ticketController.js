@@ -15,25 +15,6 @@ router.post("/", authenticateToken, async (req, res) => {
     }
 });
 
-router.patch("/approved/:ticketId", authenticateManagerToken, async (req, res) => {
-    logger.info(`PUT /approved path entered ticketId: ${req.params.ticketId}`);
-    const ticket = await ticketService.approveTicket(req.params.ticketId);
-    if (ticket) {
-        res.status(200).json({ ticket });
-    } else {
-        res.status(400).json({ message: "Ticket not updated" });
-    }
-});
-
-router.patch("/denied/:ticketId", authenticateManagerToken, async (req, res) => {
-    logger.info(`PUT /denied path entered ticketId: ${req.params.ticketId}`);
-    const ticket = await ticketService.denyTicket(req.params.ticketId);
-    if (ticket) {
-        res.status(200).json({ ticket });
-    } else {
-        res.status(400).json({ message: "Ticket not updated" });
-    }
-});
 
 router.get("/all", authenticateManagerToken, async (req, res) => {
     logger.info("get /all path entered admin");
@@ -42,8 +23,14 @@ router.get("/all", authenticateManagerToken, async (req, res) => {
 })
 
 router.get("/queue", authenticateManagerToken, async (req, res) => {
-    logger.info("get /queue path entered admin");
-    const tickets = await ticketService.getTicketQueue();
+    logger.info("get /queue path entered admin ");
+    const tickets = await ticketService.getTicketListByStatus("pending");
+    res.status(200).json({ tickets });
+})
+
+router.get("/status/:status", authenticateManagerToken, async (req, res) => {
+    logger.info("get /status path entered admin ${:req.params.status}");
+    const tickets = await ticketService.getTicketListByStatus(req.params.status);
     res.status(200).json({tickets});
 })
 
@@ -52,6 +39,16 @@ router.get("/my-tickets", authenticateToken, async (req, res) => {
     const tickets = await ticketService.getTicketListEmployeeId(req.user.user_id);
     res.status(200).json({ tickets });
 })
+
+router.patch("/:ticketId/:status", authenticateManagerToken, async (req, res) => {
+    logger.info(`PUT /approved path entered ticketId: ${req.params.ticketId}, status is ${req.params.status}`);
+    const ticket = await ticketService.setTicketStatus(req.params.ticketId, req.params.status);
+    if (ticket) {
+        res.status(200).json({ ticket });
+    } else {
+        res.status(400).json({ message: "Ticket not updated" });
+    }
+});
 
 router.get("/:ticketId", authenticateToken, async (req, res) => {
     logger.info("GET /:ticketId path entered");
