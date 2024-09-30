@@ -92,7 +92,7 @@ async function getTicketById(ticket_id){
         logger.error(err);
     }
 }
-async function getTicketQueue(){
+async function getTicketListByStatus(status){
     const scanCommand = new ScanCommand({
         TableName,
         FilterExpression: "#s = :s",
@@ -100,7 +100,7 @@ async function getTicketQueue(){
             "#s": "status"
         },
         ExpressionAttributeValues: {
-            ":s": "pending"
+            ":s": status
         }
     });
     try {
@@ -118,5 +118,5 @@ module.exports = {
     createTicket,
     processTicket,
     getTicketById,
-    getTicketQueue
+    getTicketListByStatus
 }
