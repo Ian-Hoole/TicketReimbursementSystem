@@ -16,6 +16,7 @@ function rebuildDatabase(){
 ticketDao.getTicketList = jest.fn(async () => {
     return mockTicketDB;
 });
+
 ticketDao.getTicketById = jest.fn(async (ticket_id) => {
     let tempTicket = null;
     mockTicketDB.forEach(ticket => {
@@ -25,6 +26,7 @@ ticketDao.getTicketById = jest.fn(async (ticket_id) => {
     });
     return tempTicket;
 });
+
 ticketDao.getTicketListEmployeeId = jest.fn(async (user_id) => {
     let ticketArr = [];
     mockTicketDB.forEach(ticket => {
@@ -34,18 +36,24 @@ ticketDao.getTicketListEmployeeId = jest.fn(async (user_id) => {
     });
     return ticketArr;
 });
-ticketDao.getTicketQueue = jest.fn(async () => {
-    let ticketArr = [];
-    mockTicketDB.forEach(ticket => {
-        if (ticket.status === "pending") {
-            ticketArr.push(ticket);
-        }
-    });
+
+ticketDao.getTicketListByStatus = jest.fn(async (status) => {
+    let ticketArr = null;
+    if (status === "pending" || status === "approved" || status === "denied"){
+        ticketArr = [];
+        mockTicketDB.forEach(ticket => {
+            if (ticket.status === status) {
+                ticketArr.push(ticket);
+            }
+        });
+    }
     return ticketArr;
 });
+
 ticketDao.createTicket = jest.fn(async (ticket) => {
     return 200;
 });
+
 ticketDao.processTicket = jest.fn(async (ticket_id, status) => {
     let tempTicket = null;
     mockTicketDB.forEach(ticket => {
@@ -56,6 +64,7 @@ ticketDao.processTicket = jest.fn(async (ticket_id, status) => {
     tempTicket.status = status;
     return tempTicket;
 });
+
 //Test cases
 describe("Testing ticket creation via ticketService.createTicket", () => {
     beforeEach(() => {
@@ -221,7 +230,7 @@ describe("Testing getting a ticketList via ticketService.getTicketList", () => {
         });
 });
 
-describe("Testing approving a ticket via ticketService.approveTicket", () => {
+describe("Testing modifying a ticket via ticketService.setTicketStatus", () => {
     beforeEach(() => {
         rebuildDatabase();
         ticketDao.processTicket.mockClear();
@@ -229,103 +238,77 @@ describe("Testing approving a ticket via ticketService.approveTicket", () => {
     });
     test("Approve a valid ticket", async () => {
         const ticketId = "1";
+        const status = "approved";
 
         const expectedResult = { ticket_id: "1", user_id: "1", amount: 123.4, description: "SampleTicket1", status: "approved", type: "travel", "url": "http://localhost:3000/tickets/1" }
         let result = null
 
-        result = await ticketService.approveTicket(ticketId);
+        result = await ticketService.setTicketStatus(ticketId, status);
 
         expect(result).toEqual(expectedResult);
         expect(ticketDao.getTicketById).toHaveBeenCalled()
         expect(ticketDao.processTicket).toHaveBeenCalled();
     });
-    test("Approve an invalid ticket id", async () => {
-        const ticketId = "5";
+    test("Set a ticket with an invalid status", async () => {
+        const ticketId = "1";
+        const status = "perchance";
 
         const expectedResult = null;
         let result = null
 
-        result = await ticketService.approveTicket(ticketId);
+        result = await ticketService.setTicketStatus(ticketId, status);
 
         expect(result).toEqual(expectedResult);
-        expect(ticketDao.getTicketById).toHaveBeenCalled()
+        expect(ticketDao.getTicketById).not.toHaveBeenCalled()
         expect(ticketDao.processTicket).not.toHaveBeenCalled();
-    });
-    test("Approve an without a ticketId", async () => {
-        const ticketId = null;
-
-        const expectedResult = null;
-        let result = null
-
-        result = await ticketService.approveTicket(ticketId);
-
-        expect(result).toEqual(expectedResult);
-        expect(ticketDao.getTicketById).not.toHaveBeenCalled();
-        expect(ticketDao.processTicket).not.toHaveBeenCalled();
-    });
-    test("Approve a ticket that is not pending", async () => {
-        const ticketId = "3";
-
-        const expectedResult = null;
-        let result = null
-
-        result = await ticketService.approveTicket(ticketId);
-
-        expect(result).toEqual(expectedResult);
-        expect(ticketDao.getTicketById).toHaveBeenCalled();
-        expect(ticketDao.processTicket).not.toHaveBeenCalled();
-    });
-})
-
-describe("Testing denying a ticket via ticketService.denyTicket", () => {
-    beforeEach(() => {
-        rebuildDatabase();
-        ticketDao.processTicket.mockClear();
-        ticketDao.getTicketById.mockClear();
     });
     test("Deny a valid ticket", async () => {
         const ticketId = "1";
+        const status = "denied";
 
-        const expectedResult = { ticket_id: "1", user_id: "1", amount: 123.4, description: "SampleTicket1", status: "denied", type: "travel", "url": "http://localhost:3000/tickets/1" }
+        const expectedResult = { ticket_id: "1", user_id: "1", amount: 123.4, description: "SampleTicket1", status: "approved", type: "travel", "url": "http://localhost:3000/tickets/1" }
         let result = null
 
-        result = await ticketService.denyTicket(ticketId);
+        result = await ticketService.setTicketStatus(ticketId, status);
 
         expect(result).toEqual(expectedResult);
         expect(ticketDao.getTicketById).toHaveBeenCalled()
         expect(ticketDao.processTicket).toHaveBeenCalled();
     });
-    test("Deny an invalid ticket id", async () => {
+    test("Change the status of an invalid ticket id", async () => {
         const ticketId = "5";
+        const status = "approved";
 
         const expectedResult = null;
         let result = null
 
-        result = await ticketService.denyTicket(ticketId);
+        result = await ticketService.setTicketStatus(ticketId, status);
 
         expect(result).toEqual(expectedResult);
         expect(ticketDao.getTicketById).toHaveBeenCalled()
         expect(ticketDao.processTicket).not.toHaveBeenCalled();
     });
-    test("Deny an without a ticketId", async () => {
+    test("Change the status of a ticket without a ticketId", async () => {
         const ticketId = null;
+        const status = "approved";
 
         const expectedResult = null;
         let result = null
 
-        result = await ticketService.denyTicket(ticketId);
+        result = await ticketService.setTicketStatus(ticketId, status);
 
         expect(result).toEqual(expectedResult);
         expect(ticketDao.getTicketById).not.toHaveBeenCalled();
         expect(ticketDao.processTicket).not.toHaveBeenCalled();
     });
-    test("Deny a ticket that is not pending", async () => {
+    test("change the status of a ticket that is not pending", async () => {
         const ticketId = "3";
+        const status = "approved";
 
         const expectedResult = null;
         let result = null
 
-        result = await ticketService.denyTicket(ticketId);
+        result = await ticketService.setTicketStatus(ticketId, status);
 
         expect(result).toEqual(expectedResult);
         expect(ticketDao.getTicketById).toHaveBeenCalled();
@@ -374,20 +357,54 @@ describe("Testing getting an employee's by id via ticketService.getTicketListEmp
     });
 });
 
-describe("Testing getting a ticket queue via ticketService.getTicketQueue", () => {
+describe("Testing getting a list of tickets via ticketService.getTicketByStatus", () => {
     beforeEach(() => {
         rebuildDatabase();
-        ticketDao.getTicketList.mockClear();
+        ticketDao.getTicketListByStatus.mockClear();
     });
-    test("Get a list of all tickets", async () => {
+    test("Get a list of all pending tickets", async () => {
+        const status = "pending"
 
         const expectedResult = [{ ticket_id: "1", user_id: "1", amount: 123.4, description: "SampleTicket1", status: "pending", type: "travel", "url": "http://localhost:3000/tickets/1" },
             { ticket_id: "2", user_id: "2", amount: 5, description: "SampleTicket2", status: "pending", type: "other", "url": "http://localhost:3000/tickets/2" }]
         let result = null;
 
-        result = await ticketService.getTicketQueue();
+        result = await ticketService.getTicketListByStatus(status);
 
         expect(result).toEqual(expectedResult);
-        expect(ticketDao.getTicketQueue).toHaveBeenCalled();
+        expect(ticketDao.getTicketListByStatus).toHaveBeenCalled();
+    });
+    test("Get a list of all approved tickets", async () => {
+        const status = "approved"
+
+        const expectedResult = [{ ticket_id: "3", user_id: "2", amount: 12, description: "SampleTicket3", status: "approved", type: "food", "url": "http://localhost:3000/tickets/3" }];
+        let result = null;
+
+        result = await ticketService.getTicketListByStatus(status);
+
+        expect(result).toEqual(expectedResult);
+        expect(ticketDao.getTicketListByStatus).toHaveBeenCalled();
+    });
+    test("Get a list of all deined tickets", async () => {
+        const status = "denied"
+
+        const expectedResult = [{ ticket_id: "4", user_id: "1", amount: 3.5, description: "SampleTicket4", status: "denied", type: "lodging", "url": "http://localhost:3000/tickets/4" }]
+        let result = null;
+
+        result = await ticketService.getTicketListByStatus(status);
+
+        expect(result).toEqual(expectedResult);
+        expect(ticketDao.getTicketListByStatus).toHaveBeenCalled();
+    });
+    test("Get a list of all tickets invalid status", async () => {
+        const status = "perchance"
+
+        const expectedResult = null;
+        let result = null;
+
+        result = await ticketService.getTicketListByStatus(status);
+
+        expect(result).toEqual(expectedResult);
+        expect(ticketDao.getTicketListByStatus).not.toHaveBeenCalled();
     });
 });

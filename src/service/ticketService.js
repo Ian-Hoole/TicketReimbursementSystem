@@ -49,31 +49,19 @@ async function getTicketList() {
     })
 }
 
-async function approveTicket(ticketId) {
-    if(ticketId){
+async function setTicketStatus(ticketId, status) {
+    let newStatus = null;
+    if (status === "approved" || status === "denied"){
+        newStatus = status
+    }
+    if(ticketId && newStatus){
         const ticket = await ticketDao.getTicketById(ticketId);
         if(ticket){
             if (ticket.status === "pending") {
                 if (ticketId) {
-                    //logger.info(ticketId)
                     const newTicket = await ticketDao.processTicket(ticketId, "approved");
+                    logger.info(ticketId);
                     return { ...newTicket, url:createTicketUrl(ticket.ticket_id) }
-                }
-            }
-        }
-    }
-    return null;
-}
-
-async function denyTicket(ticketId) {
-    if(ticketId){
-        const ticket = await ticketDao.getTicketById(ticketId);
-        if (ticket) {
-            if (ticket.status === "pending") {
-                if (ticketId) {
-                    //logger.info(ticketId)
-                    const newTicket = await ticketDao.processTicket(ticketId, "denied");
-                    return { ...newTicket, url: createTicketUrl(ticket.ticket_id) }
                 }
             }
         }
@@ -91,11 +79,29 @@ async function getTicketListEmployeeId(userId) {
     return null;
 }
 
-async function getTicketQueue(){
-    const ticketList = await ticketDao.getTicketQueue();
-    return ticketList.map((ticket) => {
-        return { ...ticket, url: createTicketUrl(ticket.ticket_id) }
-    })
+
+async function getTicketListByStatus(status){
+    if(status === "pending"){
+        const ticketList = await ticketDao.getTicketListByStatus("pending");
+        return ticketList.map((ticket) => {
+            return { ...ticket, url: createTicketUrl(ticket.ticket_id) }
+        })
+    }
+    else if (status === "approved") {
+        const ticketList = await ticketDao.getTicketListByStatus("approved");
+        return ticketList.map((ticket) => {
+            return { ...ticket, url: createTicketUrl(ticket.ticket_id) }
+        })
+    }
+    else if (status === "denied") {
+        const ticketList = await ticketDao.getTicketListByStatus("denied");
+        return ticketList.map((ticket) => {
+            return { ...ticket, url: createTicketUrl(ticket.ticket_id) }
+        })
+    }
+    else{
+        return null;
+    }
 }
 
 function createTicketUrl(id){
@@ -104,9 +110,8 @@ function createTicketUrl(id){
 module.exports = {
     getTicketList,
     createTicket,
-    approveTicket,
-    denyTicket,
     getTicketListEmployeeId,
     getTicketById,
-    getTicketQueue
+    getTicketListByStatus,
+    setTicketStatus
 }
